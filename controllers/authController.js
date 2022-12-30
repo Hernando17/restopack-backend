@@ -12,18 +12,28 @@ async function userlist(req, res, next) {
 }
 
 async function registerUser(req, res, next) {
-  const register = await prisma.user.create({
-    data: {
-      username: "test",
-      email: "test@email.com",
-      password: "test123",
-      isRestaurant: true,
-      isWaitress: false,
-      created_at: null,
-      updated_at: null,
-      deleted_at: null,
-    },
-  });
+  try {
+    const register = await prisma.user
+      .create({
+        data: {
+          username: req.body.username,
+          email: req.body.email,
+          password: req.body.password,
+          isRestaurant: req.body.isRestaurant,
+          isWaitress: req.body.isWaitress,
+          created_at: req.body.created_at,
+          updated_at: req.body.updated_at,
+          deleted_at: req.body.deleted_at,
+        },
+      })
+      .then(function () {
+        res.status(201).json({
+          message: "success",
+        });
+      });
+  } catch (e) {
+    next(e);
+  }
 }
 
 module.exports = { userlist, registerUser };
