@@ -1,12 +1,11 @@
 const express = require("express");
-const res = require("express/lib/response");
+const AuthRouter = require("./routes/authRoutes");
 const app = express();
 const VERSION = "V1";
 const port = 3000;
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+app.use(express.json());
+app.use(AuthRouter);
 
 app.listen(port, () => {
   console.log(`RestoPACK API ${VERSION}`);
