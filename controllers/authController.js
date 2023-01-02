@@ -1,15 +1,19 @@
 const sequelize = require("sequelize");
-var jwt = require("jsonwebtoken");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const {User} = require("../models");
+const {Restaurant, Waitress} = require("../models");
 const cookieParser = require('cookie-parser')
 const dotenv = require('dotenv');
 
 async function getAllUser(req, res, next) {
-    console.log("test")
     try {
-        const getUser = await User.findAll().then(function (response) {
-            return res.status(200).json(response);
+        const getRestaurant = await Restaurant.findAll().then(async function (response) {
+            const getWaitress = await Waitress.findAll().then(function (response2) {
+                return res.status(200).json({
+                    restaurant: response,
+                    waitress: response2
+                });
+            });
         });
     } catch (error) {
         next(error);
@@ -19,15 +23,15 @@ async function getAllUser(req, res, next) {
 async function userRegister(req, res, next) {
     try {
         const {
+            name,
             username,
             email,
             password,
             confirm_password,
             isRestaurant,
-            isWaitress,
         } = req.body;
 
-        const checkEmail = User.findAll({
+        const checkEmail = Restaurant.findAll({
             where: {
                 email,
             },
@@ -49,17 +53,27 @@ async function userRegister(req, res, next) {
         const saltRounds = 10;
         const salt = bcrypt.genSaltSync(saltRounds);
 
-        const createUser = await User.create({
-            username,
-            email,
-            password: bcrypt.hashSync(password, salt),
-            isRestaurant,
-            isWaitress,
-        }).then(function () {
-            return res
-                .status(201)
-                .send({head: "Success", message: "User registration successfully"});
-        });
+        if (isRestaurant) {
+            const createUser = await Restaurant.create({
+                name,
+                email,
+                password: bcrypt.hashSync(password, salt),
+            }).then(function () {
+                return res
+                    .status(201)
+                    .send({head: "Success", message: "User registration successfully"});
+            });
+        } else {
+            const createUser = await Waitress.create({
+                username,
+                email,
+                password: bcrypt.hashSync(password, salt),
+            }).then(function () {
+                return res
+                    .status(201)
+                    .send({head: "Success", message: "User registration successfully"});
+            });
+        }
     } catch (error) {
         next(error);
     }
@@ -69,12 +83,58 @@ async function userLogin(req, res, next) {
     const {email, password} = req.body;
 
     try {
-        const checkUser = User.findOne({
+        const checkRestaurant = Restaurant.findOne({
             where: {
                 email,
             },
         }).then(function (response) {
-            if (response) {
+            if (!response) {
+                const checkWaitress = Waitress.findOne({
+                    where: {
+                        email,
+                    }
+                }).then(function (response2) {
+                    const checkPassword = bcrypt.compare(
+                        password,
+                        response2.password,
+                        function (err, result) {
+                            const token = jwt.sign(
+                                {
+                                    username: response2.username,
+                                    email: response2.email,
+                                },
+                                process.env.SECRET,
+                                {expiresIn: "1d"}
+                            );
+
+                            const refreshToken = jwt.sign({
+                                username: response2.username,
+                                email: response2.email,
+                            }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: '30d'});
+
+                            if (result) {
+                                return res.status(200).json({
+                                    head: "Success",
+                                    message: "User login successfully",
+                                    data: {
+                                        id: response2.id,
+                                        username: response2.username,
+                                        email: response2.email,
+                                    },
+                                    token,
+                                    refreshToken,
+
+                                });
+                            } else {
+                                return res.status(403).json({
+                                    head: "Failed",
+                                    message: "Wrong password",
+                                });
+                            }
+                        }
+                    );
+                })
+            } else if (response) {
                 const checkPassword = bcrypt.compare(
                     password,
                     response.password,
@@ -101,8 +161,6 @@ async function userLogin(req, res, next) {
                                     id: response.id,
                                     username: response.username,
                                     email: response.email,
-                                    isRestaurant: response.isRestaurant,
-                                    isWaitress: response.isWaitress
                                 },
                                 token,
                                 refreshToken,
