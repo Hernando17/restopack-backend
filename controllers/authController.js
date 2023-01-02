@@ -23,7 +23,6 @@ async function getAllUser(req, res, next) {
 async function userRegister(req, res, next) {
     try {
         const {
-            name,
             username,
             email,
             password,
@@ -55,7 +54,7 @@ async function userRegister(req, res, next) {
 
         if (isRestaurant) {
             const createUser = await Restaurant.create({
-                name,
+                username,
                 email,
                 password: bcrypt.hashSync(password, salt),
             }).then(function () {
@@ -120,6 +119,7 @@ async function userLogin(req, res, next) {
                                         id: response2.id,
                                         username: response2.username,
                                         email: response2.email,
+                                        isRestaurant: false,
                                     },
                                     token,
                                     refreshToken,
@@ -161,6 +161,7 @@ async function userLogin(req, res, next) {
                                     id: response.id,
                                     username: response.username,
                                     email: response.email,
+                                    isRestaurant: true,
                                 },
                                 token,
                                 refreshToken,
