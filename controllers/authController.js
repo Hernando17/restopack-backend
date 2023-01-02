@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser')
 const dotenv = require('dotenv');
 
 async function getAllUser(req, res, next) {
+    console.log("test")
     try {
         const getUser = await User.findAll().then(function (response) {
             return res.status(200).json(response);
@@ -65,44 +66,39 @@ async function userRegister(req, res, next) {
 }
 
 async function userLogin(req, res, next) {
+    const {email, password} = req.body;
+
     try {
         const checkUser = User.findOne({
             where: {
-                email: req.body.email,
+                email,
             },
         }).then(function (response) {
             if (response) {
-                const password = bcrypt.compare(
-                    req.body.password,
+                const checkPassword = bcrypt.compare(
+                    password,
                     response.password,
                     function (err, result) {
                         const token = jwt.sign(
                             {
-                                data: response.email,
+                                username: response.username,
+                                email: response.email,
                             },
-                            "secret",
+                            process.env.SECRET,
                             {expiresIn: "1d"}
                         );
 
                         const refreshToken = jwt.sign({
-                            data: response.email,
-                        }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: '1y'});
+                            username: response.username,
+                            email: response.email,
+                        }, process.env.REFRESH_TOKEN_SECRET, {expiresIn: '30d'});
 
                         if (result) {
-                            res.cookie("ACCESS-TOKEN", token, {
-                                httpOnly: true,
-                                secure: process.env.NODE_ENV === "production",
-                            });
-
-                            res.cookie("REFRESH-TOKEN", refreshToken, {
-                                httpOnly: true,
-                                secure: process.env.NODE_ENV === "production",
-                            });
-
                             return res.status(200).json({
                                 head: "Success",
                                 message: "User login successfully",
                                 data: {
+                                    id: response.id,
                                     username: response.username,
                                     email: response.email,
                                     isRestaurant: response.isRestaurant,

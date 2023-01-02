@@ -6,7 +6,6 @@ const app = express();
 const VERSION = "V1";
 const baseURL = `http://localhost:${process.env.PORT}/`
 
-
 app.use(express.json());
 app.use(AuthRouter);
 
