@@ -1,12 +1,14 @@
 const express = require("express");
 const dotenv = require("dotenv");
 dotenv.config();
+const cors = require("cors");
 const AuthRouter = require("./routes/authRoutes");
 const TableRouter = require("./routes/tableRoutes");
 const app = express();
 const VERSION = "V1";
 const baseURL = `http://localhost:${process.env.PORT}/`;
 
+app.use(cors());
 app.use(express.json());
 app.use(AuthRouter);
 app.use(TableRouter);

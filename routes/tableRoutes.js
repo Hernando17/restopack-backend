@@ -6,9 +6,10 @@ const {
 } = require("../controllers/tableController");
 const express = require("express");
 const router = express.Router();
+const url = `api/${process.env.VERSION}`;
 
-router.get("/showalltable", tokenAuthenticate, showAllTables);
-router.post("/createtable", tokenAuthenticate, createTable);
-router.delete("/deletetable/:id", tokenAuthenticate, deleteTable);
+router.get(`/${url}/showalltable`, tokenAuthenticate, showAllTables);
+router.post(`/${url}/createtable`, tokenAuthenticate, createTable);
+router.delete(`/${url}/deletetable/:id`, tokenAuthenticate, deleteTable);
 
 module.exports = router;
