@@ -103,6 +103,13 @@ async function userLogin(req, res, next) {
             email,
           },
         }).then(function (response2) {
+          if (!response2) {
+            return res.status(404).send({
+              head: "Failed",
+              message: "User not found",
+            });
+          }
+
           const checkPassword = bcrypt.compare(
             password,
             response2.password,
@@ -129,7 +136,7 @@ async function userLogin(req, res, next) {
                 return res.status(200).json({
                   head: "Success",
                   message: "User login successfully",
-                  data: {
+                  user: {
                     id: response2.id,
                     username: response2.username,
                     email: response2.email,
@@ -147,7 +154,7 @@ async function userLogin(req, res, next) {
             }
           );
         });
-      } else if (response) {
+      } else {
         const checkPassword = bcrypt.compare(
           password,
           response.password,
@@ -174,7 +181,7 @@ async function userLogin(req, res, next) {
               return res.status(200).json({
                 head: "Success",
                 message: "User login successfully",
-                data: {
+                user: {
                   id: response.id,
                   username: response.username,
                   email: response.email,
@@ -191,10 +198,6 @@ async function userLogin(req, res, next) {
             }
           }
         );
-      } else {
-        return res
-          .status(404)
-          .json({ head: "Failed", message: "User not found" });
       }
     });
   } catch (error) {
