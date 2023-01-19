@@ -22,6 +22,42 @@ async function getAllUser(req, res, next) {
   }
 }
 
+async function getUserById(req, res, next) {
+  const { id } = req.params;
+
+  console.log(id);
+
+  try {
+    const restaurant = await Restaurant.findOne({
+      where: {
+        id: parseInt(id),
+      },
+    }).then(async function (response) {
+      if (response) {
+        return res.status(200).json({
+          username: response.username,
+          email: response.email,
+          isRestaurant: true,
+        });
+      } else {
+        const waitress = await Waitress.findOne({
+          where: {
+            id: parseInt(id),
+          },
+        }).then(function (response2) {
+          return res.status(200).json({
+            username: response2.username,
+            email: response2.email,
+            isRestaurant: false,
+          });
+        });
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 async function userRegister(req, res, next) {
   try {
     const { username, email, password, confirm_password, isRestaurant } =
@@ -205,4 +241,4 @@ async function userLogin(req, res, next) {
   }
 }
 
-module.exports = { getAllUser, userRegister, userLogin };
+module.exports = { getAllUser, userRegister, userLogin, getUserById };

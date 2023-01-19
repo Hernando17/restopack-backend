@@ -14,6 +14,7 @@ module.exports = (sequelize, DataTypes) => {
   Table.init(
     {
       number: DataTypes.INTEGER,
+      isOrdered: DataTypes.BOOLEAN,
     },
     {
       sequelize,
