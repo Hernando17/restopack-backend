@@ -7,7 +7,7 @@
     },
     "tags": [
       {
-        "name": "Auth",
+        "name": "Authentication",
         "description": "Authentication API"
       },
       {
@@ -105,7 +105,7 @@
       },
       "/login": {
         "post": {
-          "tags": ["Auth"],
+          "tags": ["Authentication"],
           "description": "Login",
           "requestBody": {
             "content": {
@@ -137,14 +137,14 @@
       },
       "/register": {
         "post": {
-          "tags": ["Auth"],
+          "tags": ["Authentication"],
           "description": "User Register",
           "requestBody": {
             "content": {
               "application/json": {
                 "schema": {
                   "example": {
-                    "username": "admin",
+                    "name": "admin",
                     "email": "admin@email.com",
                     "password": "admin123",
                     "confirm_password": "admin123",
@@ -218,6 +218,23 @@
             },
             "404": {
               "description": "Not Found"
+            }
+          }
+        }
+      },
+      "/updateuserinformation/{id}": {
+        "patch": {
+          "tags": ["Users"],
+          "description": "Update user information",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "example": {
+                    "name": "admin"
+                  }
+                }
+              }
             }
           }
         }
