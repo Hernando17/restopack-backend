@@ -54,45 +54,52 @@ async function userLogin(req, res, next) {
                 email,
             },
         }).then(function (user) {
-            bcrypt.compare(password, user.password, function (err, result) {
-                const token = jwt.sign(
-                    {
-                        username: user.username,
-                        email: user.email,
-                    },
-                    process.env.SECRET,
-                    { expiresIn: "1d" }
-                );
-
-                const refreshToken = jwt.sign(
-                    {
-                        username: user.username,
-                        email: user.email,
-                    },
-                    process.env.REFRESH_TOKEN_SECRET,
-                    { expiresIn: "30d" }
-                );
-
-                if (result) {
-                    return res.status(200).json({
-                        head: "Success",
-                        message: "User login successfully",
-                        user: {
-                            id: user.id,
+            if (user) {
+                bcrypt.compare(password, user.password, function (err, result) {
+                    const token = jwt.sign(
+                        {
                             username: user.username,
                             email: user.email,
-                            isRestaurant: true,
                         },
-                        token,
-                        refreshToken,
-                    });
-                } else {
-                    return res.status(403).json({
-                        head: "Failed",
-                        message: "Wrong password",
-                    });
-                }
-            });
+                        process.env.SECRET,
+                        { expiresIn: "1d" }
+                    );
+
+                    const refreshToken = jwt.sign(
+                        {
+                            username: user.username,
+                            email: user.email,
+                        },
+                        process.env.REFRESH_TOKEN_SECRET,
+                        { expiresIn: "30d" }
+                    );
+
+                    if (result) {
+                        return res.status(200).json({
+                            head: "Success",
+                            message: "User login successfully",
+                            user: {
+                                id: user.id,
+                                username: user.username,
+                                email: user.email,
+                                isRestaurant: true,
+                            },
+                            token,
+                            refreshToken,
+                        });
+                    } else {
+                        return res.status(403).json({
+                            head: "Failed",
+                            message: "Wrong password",
+                        });
+                    }
+                });
+            } else {
+                return res.status(404).json({
+                    head: "Failed",
+                    message: "User not found",
+                });
+            }
         });
     } catch (error) {
         next(error);
